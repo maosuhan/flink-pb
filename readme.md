@@ -12,11 +12,11 @@ Run `mvn clean install`
 Run a complete example: `org.apache.flink.pb.starter.Main`
 
 ## Connector params
-* pb.ignore-parse-errors: default is false. Task can continue running when pb format parse error.
+* pb.ignore-parse-errors: default is false. Deserialization task will continue running ignoring pb parse errors.
 
-* pb.ignore-default-values: default is false. If user ignore the default value, the row field value must be null 
-if the pb field value is not set regardless of if it has a default value. When this setting is true, the row field value
-will always return a non-null value.
+* pb.ignore-default-values: default is false. In deserialization process, if user ignore the default value, the nullability of row field value only depends
+on if this pb field value is set explicitly by API regardless of whether it has a default value or not. When this setting is false, the row field value
+is always a non-null value mixing default value.
 
     For example of proto2 syntax:
     
@@ -61,8 +61,3 @@ will always return a non-null value.
 
 * In proto3 format, default protobuf serializer will not set field value if the value is equals to pb's default value of each type. For example, int -> 0, long -> 0L, string -> "".
 But flink serializer will output all the non-null values to pb bytes regardless of if the value is equals to pb's default value.
-
-## Future Plan
-* time attribute column
-
-* add timestamp support
