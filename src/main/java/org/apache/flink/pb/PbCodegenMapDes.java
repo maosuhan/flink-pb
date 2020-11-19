@@ -17,7 +17,7 @@ public class PbCodegenMapDes implements PbCodegenDes {
 
     @Override
     public String codegen(String returnVarName, String messageGetStr) {
-        VarUid varUid = VarUid.getInstance();
+        CodegenVarUid varUid = CodegenVarUid.getInstance();
         int uid = varUid.getAndIncrement();
 
         LogicalType keyType = mapType.getKeyType();

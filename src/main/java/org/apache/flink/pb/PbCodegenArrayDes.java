@@ -16,7 +16,7 @@ public class PbCodegenArrayDes implements PbCodegenDes {
 
     @Override
     public String codegen(String returnVarName, String messageGetStr) {
-        VarUid varUid = VarUid.getInstance();
+        CodegenVarUid varUid = CodegenVarUid.getInstance();
         int uid = varUid.getAndIncrement();
         StringBuilder sb = new StringBuilder();
         String javaTypeStr = PbDesSerUtils.getTypeStrFromFD(fd);

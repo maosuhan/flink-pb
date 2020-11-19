@@ -2,14 +2,14 @@ package org.apache.flink.pb;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class VarUid {
-    private static VarUid varUid = new VarUid();
+public class CodegenVarUid {
+    private static CodegenVarUid varUid = new CodegenVarUid();
     private AtomicInteger atomicInteger = new AtomicInteger();
 
-    private VarUid() {
+    private CodegenVarUid() {
     }
 
-    public static VarUid getInstance() {
+    public static CodegenVarUid getInstance() {
         return varUid;
     }
 

@@ -21,7 +21,7 @@ public class PbCodegenRowDes implements PbCodegenDes {
 
     @Override
     public String codegen(String returnVarName, String messageGetStr) {
-        VarUid varUid = VarUid.getInstance();
+        CodegenVarUid varUid = CodegenVarUid.getInstance();
         int uid = varUid.getAndIncrement();
         StringBuilder sb = new StringBuilder();
         sb.append(PbDesSerUtils.getJavaFullName(descriptor) + " message" + uid + " = " + messageGetStr + ";");
@@ -87,6 +87,7 @@ public class PbCodegenRowDes implements PbCodegenDes {
         if (fd.isRepeated()) {
             return message + ".get" + fieldName + "Count() > 0";
         } else {
+            //proto3 syntax class do not have hasXXX interface. Be careful!
             return message + ".has" + fieldName + "()";
         }
     }
