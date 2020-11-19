@@ -61,3 +61,6 @@ is always a non-null value mixing default value.
 
 * In proto3 format, default protobuf serializer will not set field value if the value is equals to pb's default value of each type. For example, int -> 0, long -> 0L, string -> "".
 But flink serializer will output all the non-null values to pb bytes regardless of if the value is equals to pb's default value.
+
+* This serializer will not sort map keys when serialize the map type to bytes. 
+So the output byte array of two equal map may differ because of the key order issue, but it will not affect pb consumers in normal case.
