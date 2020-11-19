@@ -1,0 +1,2 @@
+org.apache.flink.pb.starter.SimpleProtobufTableSourceFactory
+org.apache.flink.pb.starter.SimpleProtobufTableSinkFactory

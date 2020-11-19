@@ -1,0 +1,14 @@
+syntax = "proto2";
+package org.apache.flink.pb.other;
+option java_package = "org.apache.flink.pb.proto";
+option java_multiple_files = true;
+
+message RepeatedMessageTest {
+    repeated InnerMessageTest d = 4;
+        message InnerMessageTest{
+          optional int32 a =1;
+          optional int64 b =2;
+        }
+}
+
+
