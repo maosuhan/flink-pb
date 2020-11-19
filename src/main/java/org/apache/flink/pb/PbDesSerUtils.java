@@ -117,17 +117,12 @@ public class PbDesSerUtils {
         }
     }
 
-    public static Descriptors.Descriptor getDescriptor(Class messageClass) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method getDescriptorMethod = messageClass.getMethod(PbConstant.PB_METHOD_GET_DESCRIPTOR);
-        return (Descriptors.Descriptor) getDescriptorMethod.invoke(null);
-    }
-
-    public static Descriptors.Descriptor validateAndReturnDescriptor(String className) {
+    public static Descriptors.Descriptor getDescriptor(String className) {
         try {
             Class<?> pbClass = Class.forName(className);
             return (Descriptors.Descriptor) pbClass.getMethod(PbConstant.PB_METHOD_GET_DESCRIPTOR).invoke(null);
         } catch (Exception y) {
-            throw new ValidationException(String.format("get %s descriptors error!", className), y);
+            throw new IllegalArgumentException(String.format("get %s descriptors error!", className), y);
         }
     }
 

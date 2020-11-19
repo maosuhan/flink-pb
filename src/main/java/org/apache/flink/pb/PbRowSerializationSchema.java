@@ -40,15 +40,15 @@ public class PbRowSerializationSchema implements SerializationSchema<RowData> {
     public PbRowSerializationSchema(RowType rowType, String messageClassName) {
         this.rowType = rowType;
         this.messageClassName = messageClassName;
-        Descriptors.Descriptor descriptor = PbDesSerUtils.validateAndReturnDescriptor(messageClassName);
+        Descriptors.Descriptor descriptor = PbDesSerUtils.getDescriptor(messageClassName);
         PbSchemaValidator pbSchemaValidator = new PbSchemaValidator(descriptor, rowType);
         pbSchemaValidator.validate();
-        this.rowToProtoByteArray = new RowToProtoByteArray(rowType, PbDesSerUtils.validateAndReturnDescriptor(messageClassName));
+        this.rowToProtoByteArray = new RowToProtoByteArray(rowType, PbDesSerUtils.getDescriptor(messageClassName));
     }
 
     @Override
     public void open(InitializationContext context) throws Exception {
-        this.rowToProtoByteArray = new RowToProtoByteArray(rowType, PbDesSerUtils.validateAndReturnDescriptor(messageClassName));
+        this.rowToProtoByteArray = new RowToProtoByteArray(rowType, PbDesSerUtils.getDescriptor(messageClassName));
     }
 
     @Override

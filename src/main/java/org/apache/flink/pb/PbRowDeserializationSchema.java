@@ -59,19 +59,10 @@ public class PbRowDeserializationSchema implements DeserializationSchema<RowData
         this.messageClassName = messageClassName;
         this.ignoreParseErrors = ignoreParseErrors;
         this.ignoreDefaultValues = ignoreDefaultValues;
-        Class messageClass;
-        try {
-            //do it in client side to report error in the first place
-            messageClass = Class.forName(messageClassName);
-            PbSchemaValidator pbSchemaValidator = new PbSchemaValidator(PbDesSerUtils.getDescriptor(messageClass), rowType);
-            pbSchemaValidator.validate();
-            protoToRowConverter = new ProtoToRowConverter(messageClass, rowType, ignoreDefaultValues);
-        } catch (ClassNotFoundException e) {
-            throw new ValidationException("message class not found", e);
-        } catch (ReflectiveOperationException e) {
-            throw new ValidationException("message class is not a standard protobuf class", e);
-        }
-
+        //do it in client side to report error in the first place
+        PbSchemaValidator pbSchemaValidator = new PbSchemaValidator(PbDesSerUtils.getDescriptor(messageClassName), rowType);
+        pbSchemaValidator.validate();
+        protoToRowConverter = new ProtoToRowConverter(messageClassName, rowType, ignoreDefaultValues);
     }
 
     public PbRowDeserializationSchema(RowType rowType, String messageClassName) {
@@ -80,12 +71,7 @@ public class PbRowDeserializationSchema implements DeserializationSchema<RowData
 
     @Override
     public void open(InitializationContext context) throws Exception {
-        try {
-            Class messageClass = Class.forName(messageClassName);
-            protoToRowConverter = new ProtoToRowConverter(messageClass, rowType, ignoreDefaultValues);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("message class not found", e);
-        }
+        protoToRowConverter = new ProtoToRowConverter(messageClassName, rowType, ignoreDefaultValues);
     }
 
     @Override

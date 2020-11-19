@@ -12,9 +12,10 @@ public class ProtoToRowConverter {
     private ScriptEvaluator se;
     private Method parseFromMethod;
 
-    public ProtoToRowConverter(Class messageClass, RowType rowType, boolean ignoreDefaultValues) {
+    public ProtoToRowConverter(String messageClassName, RowType rowType, boolean ignoreDefaultValues) {
         try {
-            Descriptors.Descriptor descriptor = PbDesSerUtils.getDescriptor(messageClass);
+            Descriptors.Descriptor descriptor = PbDesSerUtils.getDescriptor(messageClassName);
+            Class messageClass = Class.forName(messageClassName);
             if (descriptor.getFile().getSyntax() == Syntax.PROTO3) {
                 ignoreDefaultValues = false;
             }
