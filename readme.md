@@ -70,7 +70,8 @@ In serialization process, flink row may contain null value in row/map/array.
 But protobuf treat null value differently, we should take care of it.
 
 If flink row contains null element, this serializer will not write this field in the protobuf stream.
-If downstream user read this stream
+
+If downstream user read this stream:
 
 1. With proto2 class, user can call proto.hasXXX() method to know if this field exists in the stream.
 
