@@ -89,10 +89,10 @@ The default value of each type is defined below:
 | double | 0.0 |
 | string | "" |
 | enum | first enum value |
-| binary | empty byte array |
+| binary | ByteString.EMPTY |
 | list | empty list |
 | map | empty map |
-| message | empty message |
+| message | message class's default instance |
 
 Exmaple null conversion:
 
