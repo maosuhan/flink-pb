@@ -12,10 +12,10 @@ Run `mvn clean install`
 Run a complete example: `org.apache.flink.pb.starter.Main`
 
 ## Connector params
-* pb.ignore-parse-errors: default is false. Deserialization task will continue running ignoring pb parse errors.
+* `pb.ignore-parse-errors`: default is false. Deserialization task will keep running if pb parse error occurs.
 
-* pb.ignore-default-values: default is false. In deserialization process, if user ignore the default value, the nullability of row field value only depends
-on if this pb field value is set explicitly by API regardless of whether it has a default value or not. When this setting is false, the row field value
+* `pb.ignore-default-values`: default is false. In deserialization process, if user ignore the default value, the nullability of row field value only depends
+on if this pb field exists in protobuf stream. When this setting is false, the row field value
 is always a non-null value mixing default value.
 
     For example of proto2 syntax:
@@ -54,12 +54,12 @@ is always a non-null value mixing default value.
 | REPEATED  | ARRAY |
 | MAP  | Map |
 
-* The order and the number of columns can be defined freely.
+* Pb table factory recognize corresponding field mapping by field name. So user can create table freely with subset of the pb fields.
 
-* If the output pb format has `one-of` field, the value is determined by the biggest position among the candidate non-null elements in result row schema.
+* If the output pb format has `one-of` field, the value is determined by the biggest position among the candidate non-null elements in result row.
 
 * In proto3 format, default protobuf serializer will not set field value if the value is equals to pb's default value of each type. For example, int -> 0, long -> 0L, string -> "".
-But this serializer will output all the non-null values to pb bytes regardless of if the value is equals to pb's default value.
+But this serializer will output all the non-null values to pb bytes regardless of whether the value is equals to pb's default value.
 
 * This serializer will not sort map keys when serialize the map type to bytes. 
 So the output byte array of two equal map may differ because of the key order issue, but it will not affect pb consumers in normal case.
@@ -70,7 +70,6 @@ In serialization process, flink row may contain null value in row/map/array.
 But protobuf treat null value differently, we should take care of it.
 
 If flink row contains null element, this serializer will not write this field in the protobuf stream.
-
 If downstream user read this stream:
 
 1. With proto2 class, user can call proto.hasXXX() method to know if this field exists in the stream.
