@@ -7,6 +7,7 @@ import com.google.protobuf.WireFormat;
 import org.apache.flink.table.data.ArrayData;
 import org.apache.flink.table.data.MapData;
 import org.apache.flink.table.data.RowData;
+import org.apache.flink.table.data.StringData;
 import org.apache.flink.table.types.logical.ArrayType;
 import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.MapType;
@@ -74,13 +75,15 @@ public class RowToProtoByteArray {
             for (ProtoSchemaMeta protoSchemaMeta : protoSchemaMetaList) {
                 Descriptors.FieldDescriptor fd = protoSchemaMeta.getFd();
                 int schemaIndex = protoSchemaMeta.getSchemeIndex();
+                LogicalType fieldLogicalType = protoSchemaMeta.getLogicalType();
                 if (!row.isNullAt(schemaIndex)) {
                     if (!fd.isRepeated() && !fd.isMapField()) {
                         //row or simple type
                         stream.writeTag(fd.getNumber(), fd.getLiteType().getWireType());
                         if (fd.getJavaType() == JavaType.MESSAGE) {
                             //row type
-                            RowData subRowData = row.getRow(schemaIndex, ((RowType) protoSchemaMeta.getLogicalType()).getFieldCount());
+                            RowData.FieldGetter fieldGetter = RowData.createFieldGetter(fieldLogicalType, schemaIndex);
+                            RowData subRowData = (RowData) fieldGetter.getFieldOrNull(row);
                             RowToProtoByteArray subRowToProtoByteArray = protoIndexToConverterMap.get(fd.getNumber());
                             writeMessage(stream, subRowToProtoByteArray, subRowData);
                         } else {
@@ -103,12 +106,13 @@ public class RowToProtoByteArray {
                             CodedOutputStream entryStream = CodedOutputStream.newInstance(entryBaos);
 
                             entryStream.writeTag(PbConstant.PB_MAP_KEY_TAG, keyFd.getLiteType().getWireType());
+                            //key might be null
                             writeSimpleObj(entryStream, keys, i, keyFd);
                             if (!values.isNullAt(i)) {
                                 entryStream.writeTag(PbConstant.PB_MAP_VALUE_TAG, valueFd.getLiteType().getWireType());
                                 if (valueFd.getJavaType() == JavaType.MESSAGE) {
-                                    RowType mapValueType = (RowType) mapType.getValueType();
-                                    writeMessage(entryStream, protoIndexToConverterMap.get(fd.getNumber()), values.getRow(i, mapValueType.getFieldCount()));
+                                    ArrayData.ElementGetter elementGetter = ArrayData.createElementGetter(mapType.getValueType());
+                                    writeMessage(entryStream, protoIndexToConverterMap.get(fd.getNumber()), elementGetter.getElementOrNull(values, i));
                                 } else {
                                     writeSimpleObj(entryStream, values, i, valueFd);
                                 }
@@ -123,10 +127,16 @@ public class RowToProtoByteArray {
                         //repeated row or repeated simple type
                         ArrayData objs = row.getArray(schemaIndex);
                         for (int j = 0; j < objs.size(); j++) {
+                            if (objs.isNullAt(j)) {
+                                continue;
+                            }
+                            //element must not be null
                             stream.writeTag(fd.getNumber(), fd.getLiteType().getWireType());
                             if (fd.getJavaType() == JavaType.MESSAGE) {
                                 //repeated row
-                                writeMessage(stream, protoIndexToConverterMap.get(fd.getNumber()), objs.getRow(j, fd.getMessageType().getFields().size()));
+                                ArrayData.ElementGetter elementGetter = ArrayData.createElementGetter(((ArrayType) fieldLogicalType).getElementType());
+                                Object messageElement = elementGetter.getElementOrNull(objs, j);
+                                writeMessage(stream, protoIndexToConverterMap.get(fd.getNumber()), elementGetter.getElementOrNull(objs, j));
                             } else {
                                 //repeated simple type
                                 writeSimpleObj(stream, objs, j, fd);
@@ -143,28 +153,6 @@ public class RowToProtoByteArray {
         }
     }
 
-//
-//    private void writeSimpleObj(CodedOutputStream stream, Object obj, Descriptors.FieldDescriptor fd) throws IOException {
-//        if (fd.getJavaType() == JavaType.STRING) {
-//            stream.writeStringNoTag((String) obj);
-//        } else if (fd.getJavaType() == JavaType.INT) {
-//            stream.writeInt32NoTag((int) obj);
-//        } else if (fd.getJavaType() == JavaType.LONG) {
-//            stream.writeInt64NoTag((long) obj);
-//        } else if (fd.getJavaType() == JavaType.FLOAT) {
-//            stream.writeFloatNoTag((float) obj);
-//        } else if (fd.getJavaType() == JavaType.DOUBLE) {
-//            stream.writeDoubleNoTag((double) obj);
-//        } else if (fd.getJavaType() == JavaType.BOOLEAN) {
-//            stream.writeBoolNoTag((boolean) obj);
-//        } else if (fd.getJavaType() == JavaType.BYTE_STRING) {
-//            stream.writeByteArrayNoTag((byte[]) obj);
-//        } else if (fd.getJavaType() == JavaType.ENUM) {
-//            stream.writeEnumNoTag(fd.getEnumType().findValueByName((String) obj).getNumber());
-//        } else {
-//            throw new ProtobufDirectOutputStreamException("cannot write object type: " + obj.getClass());
-//        }
-//    }
 
     //the field must not be null
     private void writeSimpleObj(CodedOutputStream stream, RowData row, int pos, Descriptors.FieldDescriptor fd) throws IOException {
@@ -220,7 +208,15 @@ public class RowToProtoByteArray {
                 stream.writeByteArrayNoTag(array.getBinary(pos));
                 break;
             case ENUM:
-                stream.writeEnumNoTag(fd.getEnumType().findValueByName(array.getString(pos).toString()).getNumber());
+                Descriptors.EnumValueDescriptor enumValueDescriptor = fd.getEnumType().findValueByName(array.getString(pos).toString());
+                if (null == enumValueDescriptor) {
+                    //cannot find correspond enum value
+                    int firstEnumTagNum = fd.getEnumType().getValues().get(0).getNumber();
+                    stream.writeEnumNoTag(firstEnumTagNum);
+                } else {
+                    //can find correspond enum value
+                    stream.writeEnumNoTag(enumValueDescriptor.getNumber());
+                }
                 break;
         }
     }

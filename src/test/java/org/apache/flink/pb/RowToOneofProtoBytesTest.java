@@ -10,14 +10,7 @@ public class RowToOneofProtoBytesTest extends TestCase {
     public void testSimple() throws Exception {
         RowData row = GenericRowData.of(1, 2);
 
-        RowType rowType = PbRowTypeInformation.generateRowType(OneofTest.getDescriptor());
-        row = FlinkProtobufHelper.validateRow(row, rowType);
-
-        PbRowSerializationSchema serializationSchema = new PbRowSerializationSchema(
-                rowType,
-                OneofTest.class.getName());
-
-        byte[] bytes = serializationSchema.serialize(row);
+        byte[] bytes = FlinkProtobufHelper.rowToPbBytes(row, OneofTest.class);
         OneofTest oneofTest = OneofTest.parseFrom(bytes);
         assertFalse(oneofTest.hasA());
         assertEquals(2, oneofTest.getB());

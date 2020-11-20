@@ -5,7 +5,7 @@ import org.apache.flink.pb.proto.MultipleLevelMessageTest;
 import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.types.logical.RowType;
 
-public class MessageProtoToRowTest extends TestCase {
+public class MultiLevelMessageProtoToRowTest extends TestCase {
     public void testMessage() throws Exception {
         RowType rowType = PbRowTypeInformation.generateRowType(MultipleLevelMessageTest.getDescriptor());
         PbRowDeserializationSchema deserializationSchema = new PbRowDeserializationSchema(

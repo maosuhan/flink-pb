@@ -36,6 +36,7 @@ public class PbCodegenRowDes implements PbCodegenDes {
             String returnVar = "returnVar" + subUid;
             sb.append("Object " + returnVar + " = null;");
             if (ignoreDefaultValues) {
+                //ignoreDefaultValues must be false in pb3 mode or compilation error will occur
                 sb.append("if(" + isMessageNonEmptyStr("message" + uid, strongCamelFieldName, subFd) + "){");
             }
             String subMessageGetStr = getMessageGetStr("message" + uid, strongCamelFieldName, subFd);

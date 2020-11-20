@@ -19,18 +19,22 @@ public class RowToMapProtoBytesTest extends TestCase {
         map2.put(StringData.fromString("c"), GenericRowData.of(1, 2L));
         RowData row = GenericRowData.of(1, new GenericMapData(map1), new GenericMapData(map2));
 
-        RowType rowType = PbRowTypeInformation.generateRowType(MapTest.getDescriptor());
-        row = FlinkProtobufHelper.validateRow(row, rowType);
+        byte[] bytes = FlinkProtobufHelper.rowToPbBytes(row, MapTest.class);
 
-        PbRowSerializationSchema serializationSchema = new PbRowSerializationSchema(rowType,
-                MapTest.class.getName());
-
-        byte[] bytes = serializationSchema.serialize(row);
         MapTest mapTest = MapTest.parseFrom(bytes);
         assertEquals(1, mapTest.getA());
         assertEquals("b", mapTest.getMap1Map().get("a"));
         MapTest.InnerMessageTest innerMessageTest = mapTest.getMap2Map().get("c");
         assertEquals(1, innerMessageTest.getA());
         assertEquals(2L, innerMessageTest.getB());
+    }
+
+    public void testNull() throws Exception {
+        RowData row = GenericRowData.of(1, null, null);
+
+        byte[] bytes = FlinkProtobufHelper.rowToPbBytes(row, MapTest.class);
+        MapTest mapTest = MapTest.parseFrom(bytes);
+        Map<String, String> map = mapTest.getMap1Map();
+        assertEquals(0, map.size());
     }
 }

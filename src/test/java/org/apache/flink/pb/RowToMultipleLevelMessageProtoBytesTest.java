@@ -26,4 +26,14 @@ public class RowToMultipleLevelMessageProtoBytesTest extends TestCase {
         assertEquals(2L, test.getD().getA().getB());
         assertEquals(1, test.getA());
     }
+
+    public void testNull() throws Exception {
+        RowData row = GenericRowData.of(1, 2L, false, null);
+        byte[] bytes = FlinkProtobufHelper.rowToPbBytes(row, MultipleLevelMessageTest.class);
+
+        MultipleLevelMessageTest test = MultipleLevelMessageTest.parseFrom(bytes);
+
+        MultipleLevelMessageTest.InnerMessageTest1 empty = MultipleLevelMessageTest.InnerMessageTest1.newBuilder().build();
+        assertEquals(empty, test.getD());
+    }
 }

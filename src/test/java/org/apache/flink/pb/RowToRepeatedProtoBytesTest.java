@@ -42,4 +42,10 @@ public class RowToRepeatedProtoBytesTest extends TestCase {
         assertEquals(0, repeatedTest.getBCount());
     }
 
+    public void testNull() throws Exception {
+        RowData row = GenericRowData.of(1, null, false, 0.1f, 0.01, StringData.fromString("hello"));
+        byte[] bytes = FlinkProtobufHelper.rowToPbBytes(row, RepeatedTest.class);
+        RepeatedTest repeatedTest = RepeatedTest.parseFrom(bytes);
+        assertEquals(0, repeatedTest.getBCount());
+    }
 }
