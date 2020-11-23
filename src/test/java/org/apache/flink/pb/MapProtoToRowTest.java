@@ -35,28 +35,4 @@ public class MapProtoToRowTest extends TestCase {
         assertEquals(1, rowData2.getInt(0));
         assertEquals(2L, rowData2.getLong(1));
     }
-
-    public void testNullValue() {
-        MapTest mapTest;
-        try {
-            mapTest = MapTest.newBuilder()
-                    .setA(1)
-                    .putMap1("a", null).build();
-        } catch (NullPointerException ex) {
-            return;
-        }
-        fail("value cannot be null");
-    }
-
-    public void testNullKey() {
-        MapTest mapTest;
-        try {
-            mapTest = MapTest.newBuilder()
-                    .setA(1)
-                    .putMap1(null, "1").build();
-        } catch (NullPointerException ex) {
-            return;
-        }
-        fail("value cannot be null");
-    }
 }

@@ -77,6 +77,7 @@ public class RowToProtoByteArray {
                 int schemaIndex = protoSchemaMeta.getSchemeIndex();
                 LogicalType fieldLogicalType = protoSchemaMeta.getLogicalType();
                 if (!row.isNullAt(schemaIndex)) {
+                    //field value must not be null
                     if (!fd.isRepeated() && !fd.isMapField()) {
                         //row or simple type
                         stream.writeTag(fd.getNumber(), fd.getLiteType().getWireType());
@@ -105,10 +106,13 @@ public class RowToProtoByteArray {
                             ByteArrayOutputStream entryBaos = new ByteArrayOutputStream();
                             CodedOutputStream entryStream = CodedOutputStream.newInstance(entryBaos);
 
-                            entryStream.writeTag(PbConstant.PB_MAP_KEY_TAG, keyFd.getLiteType().getWireType());
-                            //key might be null
-                            writeSimpleObj(entryStream, keys, i, keyFd);
+                            if (!keys.isNullAt(i)) {
+                                //write key because it is not null
+                                entryStream.writeTag(PbConstant.PB_MAP_KEY_TAG, keyFd.getLiteType().getWireType());
+                                writeSimpleObj(entryStream, keys, i, keyFd);
+                            }
                             if (!values.isNullAt(i)) {
+                                //write value because it is not null
                                 entryStream.writeTag(PbConstant.PB_MAP_VALUE_TAG, valueFd.getLiteType().getWireType());
                                 if (valueFd.getJavaType() == JavaType.MESSAGE) {
                                     ArrayData.ElementGetter elementGetter = ArrayData.createElementGetter(mapType.getValueType());
@@ -119,7 +123,6 @@ public class RowToProtoByteArray {
                             }
                             entryStream.flush();
                             byte[] entryData = entryBaos.toByteArray();
-
                             stream.writeUInt32NoTag(entryData.length);
                             stream.writeRawBytes(entryData);
                         }
@@ -127,16 +130,16 @@ public class RowToProtoByteArray {
                         //repeated row or repeated simple type
                         ArrayData objs = row.getArray(schemaIndex);
                         for (int j = 0; j < objs.size(); j++) {
-                            if (objs.isNullAt(j)) {
-                                continue;
-                            }
-                            //element must not be null
                             stream.writeTag(fd.getNumber(), fd.getLiteType().getWireType());
                             if (fd.getJavaType() == JavaType.MESSAGE) {
                                 //repeated row
                                 ArrayData.ElementGetter elementGetter = ArrayData.createElementGetter(((ArrayType) fieldLogicalType).getElementType());
                                 Object messageElement = elementGetter.getElementOrNull(objs, j);
-                                writeMessage(stream, protoIndexToConverterMap.get(fd.getNumber()), elementGetter.getElementOrNull(objs, j));
+                                if(null == messageElement){
+                                    writeNullMessage(stream, fd.getMessageType());
+                                }else{
+                                    writeMessage(stream, protoIndexToConverterMap.get(fd.getNumber()), messageElement);
+                                }
                             } else {
                                 //repeated simple type
                                 writeSimpleObj(stream, objs, j, fd);
@@ -223,6 +226,12 @@ public class RowToProtoByteArray {
 
     private void writeMessage(CodedOutputStream stream, RowToProtoByteArray rowToProtoByteArray, Object obj) throws IOException {
         byte[] subBytes = rowToProtoByteArray.convertToByteArray((RowData) obj);
+        stream.writeUInt32NoTag(subBytes.length);
+        stream.writeRawBytes(subBytes);
+    }
+
+    private void writeNullMessage(CodedOutputStream stream, Descriptors.Descriptor messageType) throws IOException {
+        byte[] subBytes = messageType.toProto().getDefaultInstanceForType().toByteArray();
         stream.writeUInt32NoTag(subBytes.length);
         stream.writeRawBytes(subBytes);
     }

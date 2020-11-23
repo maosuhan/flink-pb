@@ -60,14 +60,23 @@ public class RowToNullProtoBytesTest extends TestCase {
                 //bytes
                 new GenericMapData(mapOf(StringData.fromString("key"), null))
                 ,
+                //string
                 new GenericArrayData(new Object[]{null}),
+                //int
                 new GenericArrayData(new Object[]{null}),
+                //long
                 new GenericArrayData(new Object[]{null}),
+                //boolean
                 new GenericArrayData(new Object[]{null}),
+                //float
                 new GenericArrayData(new Object[]{null}),
+                //double
                 new GenericArrayData(new Object[]{null}),
+                //enum
                 new GenericArrayData(new Object[]{null}),
+                //message
                 new GenericArrayData(new Object[]{null}),
+                //bytes
                 new GenericArrayData(new Object[]{null})
         );
         byte[] bytes = FlinkProtobufHelper.rowToPbBytes(row, NullTest.class);
@@ -112,15 +121,24 @@ public class RowToNullProtoBytesTest extends TestCase {
         assertEquals(1, nullTest.getBytesMapCount());
         assertEquals(ByteString.EMPTY, nullTest.getBytesMapMap().get("key"));
 
-        assertEquals(0, nullTest.getStringArrayCount());
-        assertEquals(0, nullTest.getIntArrayCount());
-        assertEquals(0, nullTest.getLongArrayCount());
-        assertEquals(0, nullTest.getFloatArrayCount());
-        assertEquals(0, nullTest.getDoubleArrayCount());
-        assertEquals(0, nullTest.getBooleanArrayCount());
-        assertEquals(0, nullTest.getEnumArrayCount());
-        assertEquals(0, nullTest.getMessageArrayCount());
-        assertEquals(0, nullTest.getBytesArrayCount());
+        assertEquals(1, nullTest.getStringArrayCount());
+        assertEquals("", nullTest.getStringArrayList().get(0));
+        assertEquals(1, nullTest.getIntArrayCount());
+        assertEquals(Integer.valueOf(0), nullTest.getIntArrayList().get(0));
+        assertEquals(1, nullTest.getLongArrayCount());
+        assertEquals(Long.valueOf(0L), nullTest.getLongArrayList().get(0));
+        assertEquals(1, nullTest.getFloatArrayCount());
+        assertEquals((float) 0, nullTest.getFloatArrayList().get(0));
+        assertEquals(1, nullTest.getDoubleArrayCount());
+        assertEquals((double) 0, nullTest.getDoubleArrayList().get(0));
+        assertEquals(1, nullTest.getBooleanArrayCount());
+        assertEquals(Boolean.FALSE, nullTest.getBooleanArrayList().get(0));
+        assertEquals(1, nullTest.getEnumArrayCount());
+        assertEquals(NullTest.Corpus.UNIVERSAL, nullTest.getEnumArrayList().get(0));
+        assertEquals(1, nullTest.getMessageArrayCount());
+        assertEquals(NullTest.InnerMessageTest.getDefaultInstance(), nullTest.getMessageArrayList().get(0));
+        assertEquals(1, nullTest.getBytesArrayCount());
+        assertEquals(ByteString.EMPTY, nullTest.getBytesArrayList().get(0));
 
     }
 }

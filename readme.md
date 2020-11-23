@@ -105,8 +105,18 @@ Exmaple null conversion:
 | map<long, long>(1, null) | map<long, long>(1, 0) |
 | map<bool, bool>(null, true) | map<bool, bool>(false, true) |
 | map<bool, bool>(true, null) | map<bool, bool>(true, false) |
+| map<string, float>("key", null) | map<string, float>("key", 0) |
+| map<string, double>("key", null) | map<string, double>("key", 0) |
 | map<string, enum>("key", null) | map<string, enum>("key", <first enum value type>) |
-| map<string, binary>("key", null) | map<string, binary>("key", BytrString.EMPTY) |
+| map<string, binary>("key", null) | map<string, binary>("key", ByteString.EMPTY) |
 | map<string, MESSAGE>("key", null) | map<string, MESSAGE>("key", MESSAGE.getDefaultInstance()) |
-| array<>(null) | array<>() |
+| array<string>(null) | array<string>("") |
+| array<int>(null) | array<int>(0) |
+| array<long>(null) | array<long>(0) |
+| array<bool>(null) | array<bool>(false) |
+| array<float>(null) | array<float>(0) |
+| array<double>(null) | array<double>(0) |
+| array<enum>(null) | array<enum>(<first enum value type>) |
+| array<binary>(null) | array<binary>(ByteString.EMPTY) |
+| array<MESSAGE>(null) | array<MESSAGE>(MESSAGE.getDefaultInstance()) |
 
