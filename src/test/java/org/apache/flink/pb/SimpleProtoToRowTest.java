@@ -35,9 +35,9 @@ public class SimpleProtoToRowTest extends TestCase {
         assertEquals("IMAGES", row.getString(7).toString());
     }
 
-    public void testNotExistsValue() throws Exception {
+    public void testNotExistsValueIgnoringDefault() throws Exception {
         RowType rowType = PbRowTypeInformation.generateRowType(SimpleTest.getDescriptor());
-        PbRowDeserializationSchema deserializationSchema = new PbRowDeserializationSchema(rowType, SimpleTest.class.getName());
+        PbRowDeserializationSchema deserializationSchema = new PbRowDeserializationSchema(rowType, SimpleTest.class.getName(), false, true);
 
         SimpleTest simple = SimpleTest.newBuilder()
                 .setB(2L)

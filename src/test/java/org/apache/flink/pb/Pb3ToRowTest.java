@@ -16,7 +16,6 @@ public class Pb3ToRowTest extends TestCase {
                 Pb3Test.class.getName(), false, false);
 
         Pb3Test.InnerMessageTest innerMessageTest = Pb3Test.InnerMessageTest.newBuilder().setA(1).setB(2).build();
-        RowData innerMessageTestRow = GenericRowData.of(1, 2L);
         Pb3Test mapTest = Pb3Test.newBuilder()
                 .setA(1)
                 .setB(2L)
