@@ -1,3 +1,7 @@
+#
+This project is deprecated because it is migrated to Flink Protobuf Format module now.
+https://nightlies.apache.org/flink/flink-docs-master/docs/connectors/table/formats/protobuf/
+
 # Flink pb serialization format
 
 ## Environment
